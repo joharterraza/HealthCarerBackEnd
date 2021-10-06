@@ -7,26 +7,26 @@ function isEmpty(val){
 }
 //ADD carer
 router.post('/carer/add', (req, res) => {
-    headers = req.headers;
+    dataAddCarer = req.body;
     // const query = `CALL addUser(?,?,?,?,?,?,?,?);`;
-    if(isEmpty(headers.username) || isEmpty(headers.password) || isEmpty(headers.photo) || isEmpty(headers.name) ||        
-    isEmpty(headers.lastname) || isEmpty(headers.phonenumber) || isEmpty(headers.email) || isEmpty(headers.dob)){
+    if(isEmpty(dataAddCarer.email) || isEmpty(dataAddCarer.password) || isEmpty(dataAddCarer.photo) || isEmpty(dataAddCarer.name) ||        
+    isEmpty(dataAddCarer.lastname) || isEmpty(dataAddCarer.phonenumber)  || isEmpty(dataAddCarer.dob) || isEmpty(dataAddCarer.genre)){
 
         res.json({Status : 900, mensaje: 'Missing parameters'})
     }    
     else{
-        const query = `insert into healthcarer (username, password, photo, name, lastName, 
-            phoneNumber, email, dateOfBirth) values(?,?,?,?,?,?,?,?)`;
-        // console.log(headers.username)
-        // console.log(headers.password)
-        // console.log(headers.photo)
-        // console.log(headers.name)
-        // console.log(headers.lastname)
-        // console.log(headers.phonenumber)
-        // console.log(headers.email)
-        // console.log(headers.dob)
-        mysqlConnection.query(query, [headers.username, headers.password, headers.photo,
-            headers.name, headers.lastname, headers.phonenumber, headers.email, headers.dob], 
+        const query = `insert into healthcarer (email, password, photo, name, lastName, 
+            phoneNumber, dateOfBirth, genre) values(?,(sha1(?)),?,?,?,?,?,?)`;
+        // console.log(dataAddCarer.email)
+        // console.log(dataAddCarer.password)
+        // console.log(dataAddCarer.photo)
+        // console.log(dataAddCarer.name)
+        // console.log(dataAddCarer.lastname)
+        // console.log(dataAddCarer.phonenumber)
+        // console.log(dataAddCarer.email)
+        // console.log(dataAddCarer.dob)
+        mysqlConnection.query(query, [dataAddCarer.email, dataAddCarer.password, dataAddCarer.photo,
+            dataAddCarer.name, dataAddCarer.lastname, dataAddCarer.phonenumber, dataAddCarer.dob, dataAddCarer.genre], 
             (err, rows, fields) => {
                 
                 if(!err) {
@@ -38,6 +38,7 @@ router.post('/carer/add', (req, res) => {
                         res.json({Status : 1, mensaje: 'Could not add carer'})
                     } 
                 }else {
+                    console.log(err)
                     res.json({Status : 1, mensaje: 'Could not add carer'})
                 }
         });
