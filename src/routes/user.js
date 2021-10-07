@@ -134,7 +134,7 @@ router.get('/user/login/', (req,res) => {
                 console.log(rows);                
                 if(rows.length == 0){
                     
-                    res.json({Status: 1, message: 'Could not find user'})
+                    res.json({Status: 1, message: 'Email or password incorrect'})
                 }
                 else{
                     user = JSON.parse(JSON.stringify(rows[0]))  
@@ -160,10 +160,10 @@ router.get('/user/login/', (req,res) => {
     }
 })
 
-router.get('/verify/', ensureToken, (req, res) => {
+router.get('/verify/user', ensureToken, (req, res) => {
    
     
-    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+    jwt.verify(req.token, 'secretkeycarer', (err, verifiedJwt) => {
     if(err){
         res.json({Status: 2, message: "Invalid Token"})
       
