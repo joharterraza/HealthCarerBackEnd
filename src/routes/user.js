@@ -140,7 +140,7 @@ router.get('/user/login/', (req,res) => {
                     user = JSON.parse(JSON.stringify(rows[0]))  
                     userIdToken = user.id 
                     // schedule = JSON.parse(getSchedule(user.id)) 
-                    jwt.sign({userIdToken}, 'secretkey', {expiresIn: 60}, (err,token) =>{
+                    jwt.sign({userIdToken}, 'secretkey', {expiresIn: 3600}, (err,token) =>{
                         
                         userJson = {Status: 0, token: token, user : rows[0]}
                         res.json(userJson)
@@ -160,10 +160,292 @@ router.get('/user/login/', (req,res) => {
     }
 })
 
+//get schedule
+router.get('/user/:id/schedule', ensureToken, (req,res) => {
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{
+            const {id} = req.params;
+    
+            if(isEmpty(id)){
+                res.json({Status : 900, message: 'Missing parameters'})
+            }
+            else{
+                const query = `  select s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
+                m.id as idMedication, m.brandName, m.info
+                from schedule as s
+                join medication as m on s.medication = m.id
+                where user = ?;`
+                mysqlConnection.query(query, [id], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);                
+                        if(rows.length == 0){
+                            
+                            res.json({Status: 1, message: 'User ID is invalid'})
+                        }
+                        else{
+                            
+                            var scheduleArray = []
+                            var medicationObject = {}
+                            rows.forEach(r => {
+                                medicationObject = {
+                                    genericName: r.idMedication,
+                                    brandName: r.brandName,
+                                    info: r.info
+                                }
+                                scheduleArray.push({
+                                    id: r.idSchedule,
+                                    startingOn: r.startingOn,
+                                    lastDoseDate: r.takenDate,
+                                    nextDoseDate: r.nextDosisDate,
+                                    takenDosis: r.takenDosis,
+                                    status: r.status,
+                                    dosage: r.Dosage,
+                                    takeEvery: r.takeEvery,
+                                    totalDosis: r.totalDosis,
+                                    medication: medicationObject
+        
+                                })
+                            });
+                            scheduleJson = {Status: 0, schedule: scheduleArray}
+                            res.json(scheduleJson)
+                                                  
+                           
+                            
+                            
+                        }
+                        
+                       
+                    }else {
+                        console.log(err)
+                        res.json({Status : 500, message: 'Internal server error'})
+                    }
+                });
+            }
+        }
+    })
+    
+})
+
+//get user by id
+router.get('/user/:id/', ensureToken, (req,res) => {
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{
+            const {id} = req.params;
+    
+            if(isEmpty(id)){
+                res.json({Status : 900, message: 'Missing parameters'})
+            }
+            else{
+                const query = `  select u.id,u.email, u.photo, u.name, u.lastName, u.phoneNumber, u.token as pairingToken, 
+                u.genre, u.dateOfBirth, u.healtCarer, l.latitude, l.longitude 
+                from user as u
+                left join location as l on u.currentLocation = l.id
+                where u.id = ?`
+                mysqlConnection.query(query, [id], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);                
+                        if(rows.length == 0){
+                            
+                            res.json({Status: 1, message: 'User ID is invalid'})
+                        }
+                        else{
+                            
+                            var userArray = {}
+                            var locationObject = {}
+                            rows.forEach(r => {
+                                if(r.latitude == null && r.longitude == null){
+                                    locationObject = null
+                                }
+                                else{
+                                    locationObject = {
+                                        latitude: r.latitude,
+                                        longitude: r.longitude,
+                                        
+                                    }
+                                }
+                                
+                                userArray = {
+                                    id: r.id,
+                                    email: r.email,
+                                    photo: r.photo,
+                                    name: r.name,
+                                    lastName: r.lastName,
+                                    phoneNumber: r.phoneNumber,
+                                    pairingToken: r.pairingToken,
+                                    gender: r.genre,
+                                    dob: r.dateOfBirth,
+                                    carer: r.healtCarer,
+                                    currentLocation: locationObject
+                                }
+                            });
+                            userJson = {Status: 0, user: userArray}
+                            res.json(userJson)
+                                                  
+                           
+                            
+                            
+                        }
+                        
+                       
+                    }else {
+                        console.log(err)
+                        res.json({Status : 500, message: 'Internal server error'})
+                    }
+                });
+            }
+        }
+    })
+    
+})
+
+//get prescription by id
+router.get('/user/:id/schedule/:idPresc', ensureToken, (req,res) => {
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{
+            const {id, idPresc} = req.params;
+    
+            if(isEmpty(id)){
+                res.json({Status : 900, message: 'Missing parameters'})
+            }
+            else{
+                const query = `  select s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
+                m.id as idMedication, m.brandName, m.info
+                from schedule as s
+                join medication as m on s.medication = m.id
+                where user = ? and s.id = ?;`
+                mysqlConnection.query(query, [id, idPresc], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);                
+                        if(rows.length == 0){
+                            
+                            res.json({Status: 1, message: 'User ID or Prescription ID is invalid'})
+                        }
+                        else{
+                            
+                            var prescArray = {}
+                            var medicationObject = {}
+                            rows.forEach(r => {
+                                medicationObject = {
+                                    genericName: r.idMedication,
+                                    brandName: r.brandName,
+                                    info: r.info
+                                }
+                                prescArray = {
+                                    id: r.idSchedule,
+                                    startingOn: r.startingOn,
+                                    lastDoseDate: r.takenDate,
+                                    nextDoseDate: r.nextDosisDate,
+                                    takenDosis: r.takenDosis,
+                                    status: r.status,
+                                    dosage: r.Dosage,
+                                    takeEvery: r.takeEvery,
+                                    totalDosis: r.totalDosis,
+                                    medication: medicationObject
+                                }
+                            });
+                            prescJson = {Status: 0, prescription: prescArray}
+                            res.json(prescJson)
+                                                  
+                           
+                            
+                            
+                        }
+                        
+                       
+                    }else {
+                        console.log(err)
+                        res.json({Status : 500, message: 'Internal server error'})
+                    }
+                });
+            }
+        }
+    })
+    
+})
+
+//get carer
+router.get('/user/:id/carer', ensureToken, (req,res) => {
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{
+            const {id} = req.params;
+    
+            if(isEmpty(id)){
+                res.json({Status : 900, message: 'Missing parameters'})
+            }
+            else{
+                const query = `  select h.id, h.email, h.photo, h.name, h.lastName, h.phoneNumber,  
+                h.genre, h.dateOfBirth 
+                from healthcarer as h
+                join user as u on u.healtCarer = h.id
+                where u.id = ?`
+                mysqlConnection.query(query, [id], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);                                     
+                        if(rows.length == 0){
+                            
+                            res.json({Status: 1, message: 'No Carer asigned'})
+                        }
+                        else{
+                            
+                            var carerObject = {}
+                           
+                            rows.forEach(r => {
+                                carerObject = {
+                                    id: r.id,
+                                    email: r.email,
+                                    photo: r.photo,
+                                    name: r.name,
+                                    lastName: r.lastName,
+                                    phoneNumber: r.phoneNumber,
+                                    pairingToken: r.pairingToken,
+                                    gender: r.genre,
+                                    dob: r.dateOfBirth
+                                    
+                                }
+                                
+                                
+                            });
+                            carerJson = {Status: 0, carer: carerObject}
+                            res.json(carerJson)
+                                                  
+                           
+                            
+                            
+                        }
+                        
+                       
+                    }else {
+                        console.log(err)
+                        res.json({Status : 500, message: 'Internal server error'})
+                    }
+                });
+            }
+        }
+    })
+    
+})
+
+
+
+
+
+
 router.get('/verify/user', ensureToken, (req, res) => {
    
     
-    jwt.verify(req.token, 'secretkeycarer', (err, verifiedJwt) => {
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
     if(err){
         res.json({Status: 2, message: "Invalid Token"})
       
@@ -173,6 +455,7 @@ router.get('/verify/user', ensureToken, (req, res) => {
   })
 })
 
+//check token aviability
 function ensureToken(req,res,next){
     const bearerHeader = req.headers["authorization"]
     if(typeof bearerHeader !== 'undefined'){

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 06, 2021 at 07:24 AM
+-- Generation Time: Oct 08, 2021 at 04:32 AM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.3
 
@@ -75,8 +75,15 @@ INSERT INTO `healthcarer` (`id`, `email`, `password`, `photo`, `name`, `lastName
 CREATE TABLE `location` (
   `id` int(11) NOT NULL,
   `latitude` double NOT NULL,
-  `longitude` varchar(45) NOT NULL
+  `longitude` double NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `location`
+--
+
+INSERT INTO `location` (`id`, `latitude`, `longitude`) VALUES
+(2, 36.2564, -103.365);
 
 -- --------------------------------------------------------
 
@@ -90,6 +97,14 @@ CREATE TABLE `medication` (
   `info` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+--
+-- Dumping data for table `medication`
+--
+
+INSERT INTO `medication` (`id`, `brandName`, `info`) VALUES
+('Paracetamol', 'Paracetamol', 'http://drugs.com/paracetamol.html'),
+('Parnate', 'Parnate', 'http://drugs.com/parnate.html');
+
 -- --------------------------------------------------------
 
 --
@@ -98,7 +113,7 @@ CREATE TABLE `medication` (
 
 CREATE TABLE `schedule` (
   `id` int(11) NOT NULL,
-  `Dosage` int(11) NOT NULL,
+  `Dosage` varchar(50) NOT NULL,
   `takeEvery` int(11) NOT NULL,
   `totalDosis` int(11) NOT NULL,
   `startingOn` datetime NOT NULL,
@@ -110,6 +125,14 @@ CREATE TABLE `schedule` (
   `user` int(11) NOT NULL,
   `medication` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `schedule`
+--
+
+INSERT INTO `schedule` (`id`, `Dosage`, `takeEvery`, `totalDosis`, `startingOn`, `takenDate`, `nextDosisDate`, `notes`, `takenDosis`, `status`, `user`, `medication`) VALUES
+(1, '10 mg Tab', 12, 3, '2021-10-07 15:12:14', '2021-10-07 15:12:14', '2021-10-08 03:12:14', '\"Should take after meal\"', 1, 1, 3, 'Parnate'),
+(2, '20 mg pill', 10, 4, '2021-10-06 15:54:24', '2021-10-06 15:54:24', '2021-10-07 01:54:24', '\"Should take after meal\"', 2, 1, 3, 'Paracetamol');
 
 -- --------------------------------------------------------
 
@@ -137,7 +160,7 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `email`, `password`, `photo`, `name`, `lastName`, `token`, `phoneNumber`, `genre`, `dateOfBirth`, `healtCarer`, `currentLocation`) VALUES
-(3, 'johar@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'johar.jpg', 'johar', 'terraza', 'fce8e4e47ba316aeb465c22364306fcad5299548', '664123456', 'masculine', '2021-01-21 00:00:00', NULL, NULL);
+(3, 'johar@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'johar.jpg', 'johar', 'terraza', 'fce8e4e47ba316aeb465c22364306fcad5299548', '664123456', 'masculine', '2021-01-21 00:00:00', 4, 2);
 
 --
 -- Indexes for dumped tables
@@ -193,13 +216,13 @@ ALTER TABLE `healthcarer`
 -- AUTO_INCREMENT for table `location`
 --
 ALTER TABLE `location`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `schedule`
 --
 ALTER TABLE `schedule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `user`
