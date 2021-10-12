@@ -11,18 +11,18 @@ function isEmpty(val){
 
 
 //ADD users
-router.post('/user/add', (req, res) => {
+router.post('/user/', (req, res) => {
     dataAddUser = req.body;
-    console.log(dataAddUser)
+    console.log(dataAddUser)    
     // const query = `CALL addUser(?,?,?,?,?,?,?,?);`;
     if(isEmpty(dataAddUser.email) || isEmpty(dataAddUser.password) || isEmpty(dataAddUser.photo) || isEmpty(dataAddUser.name) ||        
         isEmpty(dataAddUser.lastname) || isEmpty(dataAddUser.phonenumber) || isEmpty(dataAddUser.genre) ||
-        isEmpty(dataAddUser.dob)){
+        isEmpty(dataAddUser.dob) || isEmpty(dataAddUser.lat) || isEmpty(dataAddUser.long)){
 
       res.json({Status : 900, message: 'Missing parameters'})
     }
     else{
-        const query = `CALL addUser(?,?,?,?,?,?,?,?);`;
+        const query = `CALL addUser(?,?,?,?,?,?,?,?,?,?);`;
         // console.log(headers.email)
         // console.log(headers.password)
         // console.log(headers.photo)
@@ -33,7 +33,7 @@ router.post('/user/add', (req, res) => {
         //console.log(headers.dob)
         mysqlConnection.query(query, [dataAddUser.email, dataAddUser.password, dataAddUser.photo,
             dataAddUser.name, dataAddUser.lastname, dataAddUser.phonenumber, dataAddUser.genre,
-            dataAddUser.dob], (err, rows, fields) => {
+            dataAddUser.dob, dataAddUser.lat, dataAddUser.long], (err, rows, fields) => {
             if(!err) {
                 console.log(rows);
                 if(rows.affectedRows > 0){
@@ -51,79 +51,11 @@ router.post('/user/add', (req, res) => {
   
 });
 
-// //function that returns schedule from user
-// function getSchedule(idUser, next){    
-//     var result = []
-//     const query = `  select * from medicines_treatments_schedule where user = ?;`
-//     mysqlConnection.query(query, [idUser], (err, rows, fields) => {
-//         if(!err) {
-            
-//             for(var i = 0; i < rows.length; i++){
-//                 obj = JSON.parse(JSON.stringify(rows[i]))   
-//                 result.push(obj)               
-//             }    
-//             next(null,result);         
-//         }else {
-//             console.log(err);
-//             next(error)
-//         }
-        
-//     })
-    
-   
-    
-    
-// }
-
-//Get user by token
-// router.get('/user/byToken/', (req,res) => {
-//     headers = req.headers;
-//     const token = headers.token;
-//     if(isEmpty(token)){
-//         res.json({Status : 900, message: 'Missing parameters'})
-//     }
-//     else{
-//         const query = `  select id,username, photo, name, lastName, currentLat, currentLong, phoneNumber, 
-//         genre, dateOfBirth from user where token = ?;`
-//         mysqlConnection.query(query, [token], (err, rows, fields) => {
-//             if(!err) {
-//                 console.log(rows);                
-//                 if(rows.length == 0){
-                    
-//                     res.json({Status: 1, message: 'Could not find user'})
-//                 }
-//                 else{
-//                     user = JSON.parse(JSON.stringify(rows[0]))   
-//                     // schedule = JSON.parse(getSchedule(user.id)) 
-//                     userJson = {Status: 0, user : rows[0], schedule: []}                      
-//                     console.log(user.id)
-//                     getSchedule(user.id, function(err, data) {
-//                         if(err) {
-//                            // handle the error
-//                         } else {
-//                            // handle your data
-//                             for(var i= 0; i< data.length; i++){
-//                                 userJson.schedule.push(data[i])
-//                             }  
-//                             res.json(userJson)
-//                         }
-//                     });    
-                    
-//                 }
-                
-               
-//             }else {
-//                 console.log(err);
-//             }
-//         });
-//     }
-// })
-
 //Login
 router.get('/user/login/', (req,res) => {
     dataLogin = req.headers;
     
-    if(isEmpty(dataLogin.email) && isEmpty(dataLogin.password)){
+    if(isEmpty(dataLogin.email) || isEmpty(dataLogin.password)){
         res.json({Status : 900, message: 'Missing parameters'})
     }
     else{
@@ -162,38 +94,32 @@ router.get('/user/login/', (req,res) => {
 
 //get schedule
 router.get('/user/:id/schedule', ensureToken, (req,res) => {
+    var token = req.token;
     jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
         if(err){
             res.json({Status: 2, message: "Invalid Token"})
           
-        }else{
-            const {id} = req.params;
-    
-            if(isEmpty(id)){
-                res.json({Status : 900, message: 'Missing parameters'})
-            }
-            else{
-                const query = `  select s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
-                m.id as idMedication, m.brandName, m.info
-                from schedule as s
-                join medication as m on s.medication = m.id
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            if(returnedId.toString() == id){
+                const query = `   select s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
+                s.medication from schedule as s                
                 where user = ?;`
                 mysqlConnection.query(query, [id], (err, rows, fields) => {
                     if(!err) {
+                        var scheduleArray = []
+                        var medicationObject = {}
                         console.log(rows);                
                         if(rows.length == 0){
                             
-                            res.json({Status: 1, message: 'User ID is invalid'})
+                            scheduleJson = {Status: 0, schedule: scheduleArray}
+                            res.json(scheduleJson);
                         }
-                        else{
-                            
-                            var scheduleArray = []
-                            var medicationObject = {}
+                        else{                   
                             rows.forEach(r => {
                                 medicationObject = {
-                                    genericName: r.idMedication,
-                                    brandName: r.brandName,
-                                    info: r.info
+                                    name: r.medication
                                 }
                                 scheduleArray.push({
                                     id: r.idSchedule,
@@ -211,19 +137,25 @@ router.get('/user/:id/schedule', ensureToken, (req,res) => {
                             });
                             scheduleJson = {Status: 0, schedule: scheduleArray}
                             res.json(scheduleJson)
-                                                  
-                           
+                                                
+                        
                             
                             
                         }
                         
-                       
+                    
                     }else {
                         console.log(err)
                         res.json({Status : 500, message: 'Internal server error'})
                     }
                 });
             }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
         }
     })
     
@@ -231,18 +163,16 @@ router.get('/user/:id/schedule', ensureToken, (req,res) => {
 
 //get user by id
 router.get('/user/:id/', ensureToken, (req,res) => {
+    var token = req.token;
     jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
         if(err){
             res.json({Status: 2, message: "Invalid Token"})
           
-        }else{
-            const {id} = req.params;
-    
-            if(isEmpty(id)){
-                res.json({Status : 900, message: 'Missing parameters'})
-            }
-            else{
-                const query = `  select u.id,u.email, u.photo, u.name, u.lastName, u.phoneNumber, u.token as pairingToken, 
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            if(returnedId.toString() == id){
+                const query = `   select u.id,u.email, u.photo, u.name, u.lastName, u.phoneNumber, u.token as pairingToken, 
                 u.genre, u.dateOfBirth, u.healtCarer, l.latitude, l.longitude 
                 from user as u
                 left join location as l on u.currentLocation = l.id
@@ -250,55 +180,50 @@ router.get('/user/:id/', ensureToken, (req,res) => {
                 mysqlConnection.query(query, [id], (err, rows, fields) => {
                     if(!err) {
                         console.log(rows);                
-                        if(rows.length == 0){
-                            
-                            res.json({Status: 1, message: 'User ID is invalid'})
-                        }
-                        else{
-                            
-                            var userArray = {}
-                            var locationObject = {}
-                            rows.forEach(r => {
-                                if(r.latitude == null && r.longitude == null){
-                                    locationObject = null
+                        var userArray = {}
+                        var locationObject = {}
+                        rows.forEach(r => {
+                            if(r.latitude == null && r.longitude == null){
+                                locationObject = null
+                            }
+                            else{
+                                locationObject = {
+                                    latitude: r.latitude,
+                                    longitude: r.longitude,
+                                    
                                 }
-                                else{
-                                    locationObject = {
-                                        latitude: r.latitude,
-                                        longitude: r.longitude,
-                                        
-                                    }
-                                }
-                                
-                                userArray = {
-                                    id: r.id,
-                                    email: r.email,
-                                    photo: r.photo,
-                                    name: r.name,
-                                    lastName: r.lastName,
-                                    phoneNumber: r.phoneNumber,
-                                    pairingToken: r.pairingToken,
-                                    gender: r.genre,
-                                    dob: r.dateOfBirth,
-                                    carer: r.healtCarer,
-                                    currentLocation: locationObject
-                                }
-                            });
-                            userJson = {Status: 0, user: userArray}
-                            res.json(userJson)
-                                                  
-                           
+                            }
                             
-                            
-                        }
+                            userArray = {
+                                id: r.id,
+                                email: r.email,
+                                photo: r.photo,
+                                name: r.name,
+                                lastName: r.lastName,
+                                phoneNumber: r.phoneNumber,
+                                pairingToken: r.pairingToken,
+                                gender: r.genre,
+                                dob: r.dateOfBirth,
+                                carer: r.healtCarer,
+                                currentLocation: locationObject
+                            }
+                        });
+                        userJson = {Status: 0, user: userArray}
+                        res.json(userJson)
                         
-                       
+                    
                     }else {
                         console.log(err)
                         res.json({Status : 500, message: 'Internal server error'})
                     }
                 });
             }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
         }
     })
     
@@ -306,40 +231,35 @@ router.get('/user/:id/', ensureToken, (req,res) => {
 
 //get prescription by id
 router.get('/user/:id/schedule/:idPresc', ensureToken, (req,res) => {
+    var token = req.token;
     jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
         if(err){
             res.json({Status: 2, message: "Invalid Token"})
           
-        }else{
-            const {id, idPresc} = req.params;
-    
-            if(isEmpty(id)){
-                res.json({Status : 900, message: 'Missing parameters'})
-            }
-            else{
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+
+            var idPresc = req.params.idPresc
+            if(returnedId.toString() == id){
                 const query = `  select s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
-                m.id as idMedication, m.brandName, m.info
-                from schedule as s
-                join medication as m on s.medication = m.id
+                s.medication from schedule as s                
                 where user = ? and s.id = ?;`
                 mysqlConnection.query(query, [id, idPresc], (err, rows, fields) => {
                     if(!err) {
+                        var prescObject = {}
+                        var medicationObject = {}
                         console.log(rows);                
                         if(rows.length == 0){
                             
-                            res.json({Status: 1, message: 'User ID or Prescription ID is invalid'})
+                            res.json({Status: 0, prescription: prescObject})
                         }
-                        else{
-                            
-                            var prescArray = {}
-                            var medicationObject = {}
+                        else{                   
                             rows.forEach(r => {
                                 medicationObject = {
-                                    genericName: r.idMedication,
-                                    brandName: r.brandName,
-                                    info: r.info
+                                    name: r.medication
                                 }
-                                prescArray = {
+                                prescObject = {
                                     id: r.idSchedule,
                                     startingOn: r.startingOn,
                                     lastDoseDate: r.takenDate,
@@ -352,21 +272,27 @@ router.get('/user/:id/schedule/:idPresc', ensureToken, (req,res) => {
                                     medication: medicationObject
                                 }
                             });
-                            prescJson = {Status: 0, prescription: prescArray}
+                            prescJson = {Status: 0, prescription: prescObject}
                             res.json(prescJson)
-                                                  
-                           
+                                                
+                        
                             
                             
                         }
                         
-                       
+                    
                     }else {
                         console.log(err)
                         res.json({Status : 500, message: 'Internal server error'})
                     }
                 });
             }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
         }
     })
     
@@ -374,17 +300,16 @@ router.get('/user/:id/schedule/:idPresc', ensureToken, (req,res) => {
 
 //get carer
 router.get('/user/:id/carer', ensureToken, (req,res) => {
+    
+    var token = req.token;
     jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
         if(err){
             res.json({Status: 2, message: "Invalid Token"})
           
-        }else{
-            const {id} = req.params;
-    
-            if(isEmpty(id)){
-                res.json({Status : 900, message: 'Missing parameters'})
-            }
-            else{
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            if(returnedId.toString() == id){
                 const query = `  select h.id, h.email, h.photo, h.name, h.lastName, h.phoneNumber,  
                 h.genre, h.dateOfBirth 
                 from healthcarer as h
@@ -392,15 +317,15 @@ router.get('/user/:id/carer', ensureToken, (req,res) => {
                 where u.id = ?`
                 mysqlConnection.query(query, [id], (err, rows, fields) => {
                     if(!err) {
-                        console.log(rows);                                     
+                        var carerObject = {}
+                        console.log(rows);                
                         if(rows.length == 0){
                             
-                            res.json({Status: 1, message: 'No Carer asigned'})
+                            res.json({Status: 0, carer: carerObject})
                         }
-                        else{
+                        else{                   
                             
-                            var carerObject = {}
-                           
+                       
                             rows.forEach(r => {
                                 carerObject = {
                                     id: r.id,
@@ -419,22 +344,154 @@ router.get('/user/:id/carer', ensureToken, (req,res) => {
                             });
                             carerJson = {Status: 0, carer: carerObject}
                             res.json(carerJson)
-                                                  
-                           
+                                                
+                        
                             
                             
                         }
                         
-                       
+                    
                     }else {
                         console.log(err)
                         res.json({Status : 500, message: 'Internal server error'})
                     }
                 });
             }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
         }
     })
     
+})
+
+//update user location
+router.put('/user/:id/location', ensureToken, (req,res) => {
+    var token = req.token;
+    dataLocationUser = req.body;
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            if(returnedId.toString() == id){
+                if(isEmpty(dataLocationUser.currentLat) || isEmpty(dataLocationUser.currentLong)){
+                    res.json({Status : 900, message: 'Missing parameters'})
+                    
+                }
+                else{
+                    const query = `update location set latitude = ?, longitude = ?
+                    where id = (select currentLocation from user where id = ?)`  
+                    mysqlConnection.query(query, [dataLocationUser.currentLat, dataLocationUser.currentLong, id], (err, rows, fields) => {
+                        if(!err) {
+                            console.log(rows);
+                            if(rows.affectedRows > 0){
+                                res.json({Status : 0, message: 'Location Updated'})        
+                            }
+                            else{
+                                res.json({Status : 1, message: 'Could not update location'})
+                            } 
+                        }else {
+                            res.json({Status : 1, message: 'Could not update location'})
+                        }
+                    });
+
+                }
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+
+        }
+    })
+})
+
+//notify user emergency
+router.post('/user/:id/emergency', ensureToken, (req,res) => {
+    var token = req.token;
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+
+            
+            if(returnedId.toString() == id){
+                const query = ` insert into emergency(creation_date, user) values ((select current_timestamp), ?)`
+                mysqlConnection.query(query, [id], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);
+                        if(rows.affectedRows > 0){
+                            res.json({Status : 0, message: 'Emergency notified'})        
+                        }
+                        else{
+                            res.json({Status : 1, message: 'Could not create notification'})
+                        } 
+                    }else {
+                        res.json({Status : 1, message: 'Could not create notification'})
+                    }
+                });
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
+        }
+    })
+   
+})
+
+//add prescription
+router.post('/user/:id/prescription', ensureToken, (req,res) => {
+    var token = req.token;
+    dataMedicationAdd = req.body;
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+
+            
+            if(returnedId.toString() == id){
+                const query = ` insert into schedule (Dosage,takeEvery,totalDosis, startingOn,
+                    notes, status, user, medication)
+                    values (?,?,?,?,?,1,?,?)`
+                mysqlConnection.query(query, [dataMedicationAdd.dose,dataMedicationAdd.takeEvery,
+                dataMedicationAdd.numberDosis, dataMedicationAdd.startingOn, dataMedicationAdd.notes,
+                id, dataMedicationAdd.medication], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);
+                        if(rows.affectedRows > 0){
+                            res.json({Status : 0, message: 'Prescription created'})        
+                        }
+                        else{
+                            res.json({Status : 1, message: 'Could not create prescription'})
+                        } 
+                    }else {
+                        res.json({Status : 1, message: 'Could not create prescription'})
+                    }
+                });
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
+        }
+    })
+   
 })
 
 
@@ -455,18 +512,39 @@ router.get('/verify/user', ensureToken, (req, res) => {
   })
 })
 
+// function getIdByToken(token){
+//     var value = 0;
+//     jwt.verify(token, 'secretkey', (err, verifiedJwt) => {
+//         console.log(verifiedJwt.userIdToken);
+//         if(err){
+            
+//            value = 0;
+          
+//         }else{            
+//             value = verifiedJwt.userIdToken;
+//         }
+//     })
+//     return value;
+// }
+
 //check token aviability
 function ensureToken(req,res,next){
     const bearerHeader = req.headers["authorization"]
-    if(typeof bearerHeader !== 'undefined'){
-        const bearer = bearerHeader.split(" ")
-        const bearerToken = bearer[1]
-        req.token = bearerToken
-        next();
+    if(isEmpty(bearerHeader)){
+        res.json({Status: 900, message: "Missing headers"})
     }
     else{
-        res.json({Status: 2, message: "Invalid Token"})
+        if(typeof bearerHeader !== 'undefined'){
+            const bearer = bearerHeader.split(" ")
+            const bearerToken = bearer[1]
+            req.token = bearerToken
+            next();
+        }
+        else{
+            res.json({Status: 2, message: "Invalid Token"})
+        }
     }
+   
 }
 
 

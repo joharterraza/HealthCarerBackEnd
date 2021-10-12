@@ -14,6 +14,8 @@ app.set('port', process.env.PORT || 3000);
 //Middlewares
 app.use(express.json())
 
+
+
 app.get("/", (req, res) => {
     res.json({ message: "Welcome to HealthCarer."});
 });
@@ -21,6 +23,13 @@ app.get("/", (req, res) => {
 //Routes
 app.use(require('./routes/user'));
 app.use(require('./routes/carer'));
+
+//Handle 404
+app.use(function (req,res,next) {
+    jsonResponse = {Status: 404, message: "Page not found"}
+    
+    res.status(404).json(jsonResponse)
+})
 
 //Starting the server
 app.listen(app.get('port'), () => {

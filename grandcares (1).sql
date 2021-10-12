@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 08, 2021 at 04:32 AM
+-- Generation Time: Oct 12, 2021 at 04:03 AM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.4.3
 
@@ -26,20 +26,47 @@ DELIMITER $$
 --
 -- Procedures
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `addUser` (IN `_username` VARCHAR(60), IN `_password` VARCHAR(45), IN `_photo` VARCHAR(45), IN `_name` VARCHAR(45), IN `_lastName` VARCHAR(45), IN `_phoneNumber` VARCHAR(45), IN `_genre` VARCHAR(45), IN `_dob` DATETIME)  Begin
+CREATE DEFINER=`root`@`localhost` PROCEDURE `addUser` (IN `_username` VARCHAR(60), IN `_password` VARCHAR(45), IN `_photo` VARCHAR(45), IN `_name` VARCHAR(45), IN `_lastName` VARCHAR(45), IN `_phoneNumber` VARCHAR(45), IN `_genre` VARCHAR(45), IN `_dob` DATETIME, IN `_lat` DOUBLE, IN `_long` DOUBLE)  Begin
 	declare _token varchar(255);
+    declare _lastLocationId int;
 	declare exit handler for sqlexception
-		begin 			
+		begin
+			delete from location where id = _lastLocationId;
 			select 1 as message;
+            
 			rollback;        
 		end;
-        
+	set _lastLocationId = 0;
 	set _token = sha1((concat(_username,_password)));
-    insert into user(email,password,photo,name,lastName,token,phoneNumber,genre,dateOfBirth) values
-    (_username,sha1(_password),_photo,_name,_lastName,_token,_phoneNumber,_genre,_dob);
+    insert into location(latitude,longitude) values (_lat,_long);
+    set _lastLocationId = (select id from location order by id desc limit 1);	
+    insert into user(email,password,photo,name,lastName,token,phoneNumber,genre,dateOfBirth, currentLocation) values
+    (_username,sha1(_password),_photo,_name,_lastName,_token,_phoneNumber,_genre,_dob, _lastLocationId);
 END$$
 
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `emergency`
+--
+
+CREATE TABLE `emergency` (
+  `id` int(11) NOT NULL,
+  `creation_date` datetime NOT NULL,
+  `user` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `emergency`
+--
+
+INSERT INTO `emergency` (`id`, `creation_date`, `user`) VALUES
+(2, '2021-10-11 12:30:11', 15),
+(3, '2021-10-11 13:52:47', 6),
+(4, '2021-10-11 14:33:23', 18),
+(5, '2021-10-11 18:59:54', 19);
 
 -- --------------------------------------------------------
 
@@ -64,7 +91,9 @@ CREATE TABLE `healthcarer` (
 --
 
 INSERT INTO `healthcarer` (`id`, `email`, `password`, `photo`, `name`, `lastName`, `phoneNumber`, `dateOfBirth`, `genre`) VALUES
-(4, 'jorge@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'jorge.jpg', 'jorge', 'terraza', '664123456', '2021-01-23', 'masculine');
+(4, 'jorge@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'jorge.jpg', 'jorge', 'terraza', '664123456', '2021-01-23', 'masculine'),
+(10, 'sergio@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'sergio.jpg', 'sergio', 'cortes', '664123452', '1999-01-23', 'masculine'),
+(11, 'dante@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'dante.jpg', 'Dante', 'Martin', '664128452', '2003-01-23', 'masculine');
 
 -- --------------------------------------------------------
 
@@ -83,27 +112,11 @@ CREATE TABLE `location` (
 --
 
 INSERT INTO `location` (`id`, `latitude`, `longitude`) VALUES
-(2, 36.2564, -103.365);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `medication`
---
-
-CREATE TABLE `medication` (
-  `id` varchar(100) NOT NULL,
-  `brandName` varchar(100) DEFAULT NULL,
-  `info` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `medication`
---
-
-INSERT INTO `medication` (`id`, `brandName`, `info`) VALUES
-('Paracetamol', 'Paracetamol', 'http://drugs.com/paracetamol.html'),
-('Parnate', 'Parnate', 'http://drugs.com/parnate.html');
+(2, 36, -103),
+(3, 66, -25),
+(11, 30.365412, -30.52984),
+(14, 30.365412, -30.52988),
+(15, 31.365412, -32.52988);
 
 -- --------------------------------------------------------
 
@@ -117,13 +130,13 @@ CREATE TABLE `schedule` (
   `takeEvery` int(11) NOT NULL,
   `totalDosis` int(11) NOT NULL,
   `startingOn` datetime NOT NULL,
-  `takenDate` datetime NOT NULL,
-  `nextDosisDate` datetime NOT NULL,
+  `takenDate` datetime DEFAULT NULL,
+  `nextDosisDate` datetime DEFAULT NULL,
   `notes` varchar(100) DEFAULT NULL,
-  `takenDosis` int(11) NOT NULL,
+  `takenDosis` int(11) NOT NULL DEFAULT 0,
   `status` int(11) NOT NULL,
   `user` int(11) NOT NULL,
-  `medication` varchar(100) NOT NULL
+  `medication` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -131,8 +144,11 @@ CREATE TABLE `schedule` (
 --
 
 INSERT INTO `schedule` (`id`, `Dosage`, `takeEvery`, `totalDosis`, `startingOn`, `takenDate`, `nextDosisDate`, `notes`, `takenDosis`, `status`, `user`, `medication`) VALUES
-(1, '10 mg Tab', 12, 3, '2021-10-07 15:12:14', '2021-10-07 15:12:14', '2021-10-08 03:12:14', '\"Should take after meal\"', 1, 1, 3, 'Parnate'),
-(2, '20 mg pill', 10, 4, '2021-10-06 15:54:24', '2021-10-06 15:54:24', '2021-10-07 01:54:24', '\"Should take after meal\"', 2, 1, 3, 'Paracetamol');
+(5, '10 mg Tab', 12, 3, '2021-10-07 15:12:14', '2021-10-07 15:12:14', '2021-10-08 03:12:14', 'Should take after meal', 1, 1, 6, 'Paracetamol'),
+(7, '1 pill 20 mg', 2, 10, '2021-01-01 08:55:21', NULL, NULL, 'should take after meal', 0, 1, 6, 'Paracetamol'),
+(9, '1 pill 20 mg', 2, 10, '2021-01-01 08:55:21', NULL, NULL, 'should take after meal', 0, 1, 6, 'Ibuprofeno'),
+(10, '1 pill 20 mg', 2, 10, '2021-01-01 08:55:21', NULL, NULL, 'should take after meal', 0, 1, 18, 'Ibuprofeno'),
+(11, '1 pill 20 mg', 2, 10, '2021-01-01 08:55:21', NULL, NULL, 'should take after meal', 0, 1, 19, 'Ibuprofeno');
 
 -- --------------------------------------------------------
 
@@ -160,11 +176,23 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `email`, `password`, `photo`, `name`, `lastName`, `token`, `phoneNumber`, `genre`, `dateOfBirth`, `healtCarer`, `currentLocation`) VALUES
-(3, 'johar@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'johar.jpg', 'johar', 'terraza', 'fce8e4e47ba316aeb465c22364306fcad5299548', '664123456', 'masculine', '2021-01-21 00:00:00', 4, 2);
+(3, 'johar@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'johar.jpg', 'johar', 'terraza', 'fce8e4e47ba316aeb465c22364306fcad5299548', '664123456', 'masculine', '2021-01-21 00:00:00', 4, 2),
+(5, 'Raul@gmail.com', '20eabe5d64b0e216796e834f52d61fd0b70332fc', 'raul.jpg', 'Raul', 'Gonzales', 'dd931406b1e2dce8f05981e2a5e8b186b0cc3391', '6641478523', 'masculine', '2021-01-25 00:00:00', 4, 3),
+(6, 'Brandon@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'Brandon.jpg', 'Brandon', 'Rodruiguez', '9dda0cc7733602100e14187bd80c4a869df692a4', '6641478524', 'masculine', '1999-11-01 00:00:00', 10, NULL),
+(15, 'nicole@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'nico.jpg', 'Nicole', 'Martin', '9b3d4345cdf40867e04093165cbbda070ecbe414', '6641478424', 'femenine', '2005-11-01 00:00:00', NULL, 11),
+(18, 'mauricio@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'mau.jpg', 'Mauricio', 'Malo', '3ab5971abd9f2c6539bf32d4f3efc68b16a2d789', '6641478424', 'Masculine', '2005-11-01 00:00:00', 4, 14),
+(19, 'marina@gmail.com', '7c4a8d09ca3762af61e59520943dc26494f8941b', 'vaquera.jpg', 'Marina', 'Camacho', '588d23cc3d91d6f9b2cdd7c39cf344e10de4775c', '6641478424', 'Masculine', '2005-11-01 00:00:00', 4, 15);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `emergency`
+--
+ALTER TABLE `emergency`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_user` (`user`);
 
 --
 -- Indexes for table `healthcarer`
@@ -180,18 +208,11 @@ ALTER TABLE `location`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `medication`
---
-ALTER TABLE `medication`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indexes for table `schedule`
 --
 ALTER TABLE `schedule`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_medicines_user` (`user`),
-  ADD KEY `fk_schedule_medicines` (`medication`);
+  ADD KEY `fk_medicines_user` (`user`);
 
 --
 -- Indexes for table `user`
@@ -207,39 +228,50 @@ ALTER TABLE `user`
 --
 
 --
+-- AUTO_INCREMENT for table `emergency`
+--
+ALTER TABLE `emergency`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `healthcarer`
 --
 ALTER TABLE `healthcarer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `location`
 --
 ALTER TABLE `location`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `schedule`
 --
 ALTER TABLE `schedule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- Constraints for dumped tables
 --
 
 --
+-- Constraints for table `emergency`
+--
+ALTER TABLE `emergency`
+  ADD CONSTRAINT `fk_user` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
 -- Constraints for table `schedule`
 --
 ALTER TABLE `schedule`
-  ADD CONSTRAINT `fk_medicines_user` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_schedule_medicines` FOREIGN KEY (`medication`) REFERENCES `medication` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+  ADD CONSTRAINT `fk_medicines_user` FOREIGN KEY (`user`) REFERENCES `user` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `user`
