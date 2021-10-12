@@ -1,0 +1,492 @@
+{
+	"info": {
+		"_postman_id": "cd842cbc-e25e-4d68-926b-fd37d4f11a5f",
+		"name": "grandcares",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "add user ",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"marina@gmail.com\",\r\n    \"password\":\"123456\",\r\n    \"photo\": \"vaquera.jpg\",\r\n    \"name\": \"Marina\",\r\n    \"lastname\": \"Camacho\",\r\n    \"phonenumber\": \"6641478424\",\r\n    \"genre\": \"Masculine\",\r\n    \"dob\": \"2005-11-01\",\r\n    \"lat\": 30.584987,\r\n    \"long\": -60.2365\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addCarer",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"dante@gmail.com\",\r\n    \"password\":\"123456\",\r\n    \"photo\": \"dante.jpg\",\r\n    \"name\": \"Dante\",\r\n    \"lastname\": \"Martin\",\r\n    \"phonenumber\": \"664128452\",\r\n    \"genre\": \"masculine\",\r\n    \"dob\": \"2003-01-23\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/carer/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"carer",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login user",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "email",
+						"value": "marina@gmail.com",
+						"type": "text"
+					},
+					{
+						"key": "password",
+						"value": "123456",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "verify token",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MywiaWF0IjoxNjMzNzI1NTY5LCJleHAiOjE2MzM3MjkxNjl9.1JfAeqrIb0w-mfnnptqNKKFOw-tildlykkm7EgTckrw",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/verify/user",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"verify",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "carer login",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "email",
+						"value": "jorge@gmail.com",
+						"type": "text"
+					},
+					{
+						"key": "password",
+						"value": "123456",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/carer/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"carer",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user schedule",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MTksImlhdCI6MTYzNDAwMzcyNSwiZXhwIjoxNjM0MDA3MzI1fQ.9BwEJaaDAn4Ib-YkepfI429N54NOqc8lRk4vluX3wRk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/user/19/schedule/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"19",
+						"schedule",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get user by id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MTksImlhdCI6MTYzNDAwMzcyNSwiZXhwIjoxNjM0MDA3MzI1fQ.9BwEJaaDAn4Ib-YkepfI429N54NOqc8lRk4vluX3wRk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/user/19/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"19",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get presc by id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MTksImlhdCI6MTYzNDAwMzcyNSwiZXhwIjoxNjM0MDA3MzI1fQ.9BwEJaaDAn4Ib-YkepfI429N54NOqc8lRk4vluX3wRk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/user/19/schedule/11",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"19",
+						"schedule",
+						"11"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get carer",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MTksImlhdCI6MTYzNDAwMzcyNSwiZXhwIjoxNjM0MDA3MzI1fQ.9BwEJaaDAn4Ib-YkepfI429N54NOqc8lRk4vluX3wRk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/user/19/carer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"19",
+						"carer"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get patients ",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6NCwiaWF0IjoxNjM0MDA0MDI3LCJleHAiOjE2MzQwMDc2Mjd9.Gs_6ounGk5CSxinxoYjTV9krrHx0pNk1K9WuiOBhz0w",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/carer/4/patients",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"carer",
+						"4",
+						"patients"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Carer by id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6NCwiaWF0IjoxNjM0MDA0MDI3LCJleHAiOjE2MzQwMDc2Mjd9.Gs_6ounGk5CSxinxoYjTV9krrHx0pNk1K9WuiOBhz0w",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/carer/4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"carer",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update user location",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MTksImlhdCI6MTYzNDAwMzcyNSwiZXhwIjoxNjM0MDA3MzI1fQ.9BwEJaaDAn4Ib-YkepfI429N54NOqc8lRk4vluX3wRk",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"currentLat\": 31.365412,\r\n    \"currentLong\": -32.52988\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/19/location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"19",
+						"location"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create notification",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MTksImlhdCI6MTYzNDAwMzcyNSwiZXhwIjoxNjM0MDA3MzI1fQ.9BwEJaaDAn4Ib-YkepfI429N54NOqc8lRk4vluX3wRk",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/user/19/emergency",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"19",
+						"emergency"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get carer patient by id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6NCwiaWF0IjoxNjM0MDA0MDI3LCJleHAiOjE2MzQwMDc2Mjd9.Gs_6ounGk5CSxinxoYjTV9krrHx0pNk1K9WuiOBhz0w",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/carer/4/patient/19",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"carer",
+						"4",
+						"patient",
+						"19"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add prescription by user",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6MTksImlhdCI6MTYzNDAwMzcyNSwiZXhwIjoxNjM0MDA3MzI1fQ.9BwEJaaDAn4Ib-YkepfI429N54NOqc8lRk4vluX3wRk",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"dose\": \"1 pill 20 mg\",\r\n    \"takeEvery\": 2,\r\n    \"numberDosis\": 10,\r\n    \"startingOn\": \"2021-01-01 08:55:21\",\r\n    \"notes\": \"should take after meal\",    \r\n    \"medication\": \"Ibuprofeno\"\r\n\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/user/19/prescription",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"user",
+						"19",
+						"prescription"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update carer patient",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWRUb2tlbiI6NCwiaWF0IjoxNjM0MDA0MDI3LCJleHAiOjE2MzQwMDc2Mjd9.Gs_6ounGk5CSxinxoYjTV9krrHx0pNk1K9WuiOBhz0w",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"pairingToken\": \"588d23cc3d91d6f9b2cdd7c39cf344e10de4775c\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/carer/addPatient",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"carer",
+						"addPatient"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
