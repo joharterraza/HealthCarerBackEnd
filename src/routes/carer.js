@@ -318,6 +318,110 @@ router.put('/carer/addPatient', ensureToken, (req,res) => {
     
 })
 
+//update carer profile
+router.put('/carer/:id/', ensureToken, (req,res) => {
+    var token = req.token;
+    dataUserUpdate = req.body;
+    jwt.verify(req.token, 'secretkeycarer', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            if(returnedId.toString() == id){
+                if(isEmpty(dataUserUpdate.email) || isEmpty(dataUserUpdate.password) || isEmpty(dataUserUpdate.photo) || isEmpty(dataUserUpdate.name) ||        
+                isEmpty(dataUserUpdate.lastname) || isEmpty(dataUserUpdate.phonenumber) || isEmpty(dataUserUpdate.genre) ||
+                isEmpty(dataUserUpdate.dob)){
+        
+                    res.json({Status : 900, message: 'Missing parameters'})
+                }
+                else{
+                    
+                    const query = `update healthcarer set name = ?, lastName = ?, email = ?, password = (sha1(?)),
+                    phoneNumber = ?, genre = ?, dateOfBirth = ?, photo = ? where id = ?` 
+                     
+                    
+                     mysqlConnection.query(query, [dataUserUpdate.name, dataUserUpdate.lastname, dataUserUpdate.email,
+                        dataUserUpdate.password, dataUserUpdate.phonenumber, dataUserUpdate.genre, dataUserUpdate.dob,
+                        dataUserUpdate.photo, id], (err, rows, fields) => {
+                            console.log(query)
+                            if(!err) {
+                                console.log(rows);
+                                if(rows.affectedRows > 0){
+                                    res.json({Status : 0, message: 'Carer Updated'})        
+                                }
+                                else{
+                                    res.json({Status : 1, message: 'Could not update carer'})
+                                } 
+                            }else {
+                                console.log(err)
+                                res.json({Status : 1, message: 'Could not update carer'})
+                            }
+                    });
+                }
+               
+                
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
+        }
+    })
+    
+})
+
+//add prescription to user 
+router.post('/carer/:id/addprescription/:idUser', ensureToken, (req,res) => {
+    var token = req.token;
+    dataMedicationAdd = req.body;
+    jwt.verify(req.token, 'secretkeycarer', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{          
+            var id = req.params.id;
+            var idUser = req.params.idUser
+            var returnedId = verifiedJwt.userIdToken
+
+            
+            if(returnedId.toString() == id){
+                const query = ` insert into schedule (Dosage,takeEvery,totalDosis, startingOn,
+                    notes, status, user, medication)
+                    values (?,?,?,?,?,1,?,?)`
+                mysqlConnection.query(query, [dataMedicationAdd.dose,dataMedicationAdd.takeEvery,
+                dataMedicationAdd.numberDosis, dataMedicationAdd.startingOn, dataMedicationAdd.notes,
+                idUser, dataMedicationAdd.medication], (err, rows, fields) => {
+                    if(!err) {
+                        
+                        console.log(rows);
+                        if(rows.affectedRows > 0){
+                            res.json({Status : 0, message: 'Prescription created'})        
+                        }
+                        else{
+                            res.json({Status : 1, message: 'Could not create prescription'})
+                        } 
+                    }else {
+                        console.log(err)
+                        res.json({Status : 1, message: 'Could not create prescription'})
+                    }
+                });
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
+        }
+    })
+   
+})
+
+
 
 
 

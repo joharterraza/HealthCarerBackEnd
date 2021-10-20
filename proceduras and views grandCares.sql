@@ -34,4 +34,40 @@ Begin
 END$$
 DELIMITER ;
 
+drop procedure addTakenDosis
+DELIMITER $$
+CREATE PROCEDURE addTakenDosis(
+  IN _idUser int,
+  IN _idPresc int 
+)
+Begin
+	declare _newTakenDosis int;  
+    declare _takeEvery int;
+	declare exit handler for sqlexception
+		begin			
+			select 1 as message;            
+			rollback;        
+		end;
+	set _newTakenDosis = (select takenDosis from schedule where user = _idUser and id = _idPresc) + 1; 
+	if _newTakenDosis <= (select totalDosis from schedule where user = _idUser and id = _idPresc) then
+		set _takeEvery = (select takeEvery from schedule where user = _idUser and id = _idPresc);
+		update schedule set takenDosis = _newTakenDosis, takenDate = Now(), nextDosisDate = (Now() + Interval _takeEvery hour)
+		where user = _idUser and id = _idPresc and status = 1;
+	else 
+		update schedule set status = 0 where user = _idUser and id = _idPresc and status = 1;
+	end if;
+    
+    
+END$$
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
 

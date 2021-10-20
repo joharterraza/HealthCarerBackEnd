@@ -494,6 +494,99 @@ router.post('/user/:id/prescription', ensureToken, (req,res) => {
    
 })
 
+//update user profile
+router.put('/user/:id/', ensureToken, (req,res) => {
+    var token = req.token;
+    dataUserUpdate = req.body;
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            if(returnedId.toString() == id){
+                if(isEmpty(dataUserUpdate.email) || isEmpty(dataUserUpdate.password) || isEmpty(dataUserUpdate.photo) || isEmpty(dataUserUpdate.name) ||        
+                isEmpty(dataUserUpdate.lastname) || isEmpty(dataUserUpdate.phonenumber) || isEmpty(dataUserUpdate.genre) ||
+                isEmpty(dataUserUpdate.dob)){
+        
+                    res.json({Status : 900, message: 'Missing parameters'})
+                }
+                else{
+                    var concatInfo = dataUserUpdate.email + dataUserUpdate.password
+                    const query = `update user set name = ?, lastName = ?, email = ?, password = (sha1(?)),
+                    phoneNumber = ?, genre = ?, dateOfBirth = ?, photo = ?, token = (sha1('` + concatInfo + `'))
+                     where id = ?` 
+                     
+                    
+                     mysqlConnection.query(query, [dataUserUpdate.name, dataUserUpdate.lastname, dataUserUpdate.email,
+                        dataUserUpdate.password, dataUserUpdate.phonenumber, dataUserUpdate.genre, dataUserUpdate.dob,
+                        dataUserUpdate.photo, id], (err, rows, fields) => {
+                            console.log(query)
+                            if(!err) {
+                                console.log(rows);
+                                if(rows.affectedRows > 0){
+                                    res.json({Status : 0, message: 'User Updated'})        
+                                }
+                                else{
+                                    res.json({Status : 1, message: 'Could not update user'})
+                                } 
+                            }else {
+                                console.log(err)
+                                res.json({Status : 1, message: 'Could not update user'})
+                            }
+                    });
+                }
+               
+                
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
+        }
+    })
+    
+})
+
+//add taken dosis
+router.put('/user/:id/prescription/:idPresc/takenDosis', ensureToken, (req,res) => {
+    var token = req.token;
+    dataLocationUser = req.body;
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            var idPresc = req.params.idPresc
+            if(returnedId.toString() == id){
+                const query = ` call addTakenDosis(?,?)`  
+                mysqlConnection.query(query, [id, idPresc], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);
+                        if(rows.affectedRows > 0){
+                            res.json({Status : 0, message: 'Taken Dosis Updated'})        
+                        }
+                        else{
+                            res.json({Status : 1, message: 'Could not update dosis'})
+                        } 
+                    }else {
+                        res.json({Status : 1, message: 'Could not update dosis'})
+                    }
+                });
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+
+        }
+    })
+})
+
 
 
 
