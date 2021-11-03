@@ -2,11 +2,13 @@ const express = require('express');
 const app = express();
 
 app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Authorization, authorization,X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method,email,password');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
     next();
-})
+});
+
 
 //Settings
 app.set('port', process.env.PORT || 3000);
@@ -17,7 +19,7 @@ app.use(express.json())
 
 
 app.get("/", (req, res) => {
-    res.json({ message: "Welcome to HealthCarer."});
+    res.json({ message: "Welcome to HealthCarer." });
 });
 
 //Routes
@@ -25,9 +27,9 @@ app.use(require('./routes/user'));
 app.use(require('./routes/carer'));
 
 //Handle 404
-app.use(function (req,res,next) {
-    jsonResponse = {Status: 404, message: "Page not found"}
-    
+app.use(function(req, res, next) {
+    jsonResponse = { Status: 404, message: "Page not found" }
+
     res.status(404).json(jsonResponse)
 })
 
