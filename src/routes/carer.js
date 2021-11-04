@@ -7,7 +7,7 @@ function isEmpty(val){
     return (val === undefined || val == null || val.length <= 0) ? true : false;
 }
 
-//ADD carer
+//ADD carer (post-raw-no autho)
 router.post('/carer/', (req, res) => {
     dataAddCarer = req.body;
     // const query = `CALL addUser(?,?,?,?,?,?,?,?);`;
@@ -49,7 +49,7 @@ router.post('/carer/', (req, res) => {
   
 });
 
-//Carer login
+//Carer login (get-headers-no autho)
 router.get('/carer/login/', (req,res) => {
     dataLogin = req.headers;
     
@@ -90,7 +90,7 @@ router.get('/carer/login/', (req,res) => {
     }
 })
 
-//Carer by id 
+//Carer by id (get-si autho)
 router.get('/carer/:id/', ensureToken, (req,res) => {
     var token = req.token;
     jwt.verify(req.token, 'secretkeycarer', (err, verifiedJwt) => {
@@ -145,7 +145,7 @@ router.get('/carer/:id/', ensureToken, (req,res) => {
     
 })
 
-//Patients carer
+//Patients carer (get- si autho)
 router.get('/carer/:id/patients', ensureToken, (req,res) => {
     
     var token = req.token;
@@ -177,7 +177,7 @@ router.get('/carer/:id/patients', ensureToken, (req,res) => {
                                     email: r.email,
                                     photo: r.photo,
                                     name: r.name,
-                                    lastName: r.lastname,
+                                    lastName: r.lastName,
                                     phoneNumber: r.phonenumber,
                                     gender: r.genre,
                                     dob: r.dateOfBirth,
@@ -211,7 +211,7 @@ router.get('/carer/:id/patients', ensureToken, (req,res) => {
     
 })
 
-//get patient by id
+//get patient by id (get - si autho)
 router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
     
     var token = req.token;
@@ -244,7 +244,7 @@ router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
                                     email: r.email,
                                     photo: r.photo,
                                     name: r.name,
-                                    lastName: r.lastname,
+                                    lastName: r.lastName,
                                     phoneNumber: r.phonenumber,
                                     gender: r.genre,
                                     dob: r.dateOfBirth,
@@ -278,7 +278,7 @@ router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
     
 })
 
-//update user carer
+//update user carer (put - raw- si autho)
 router.put('/carer/addPatient', ensureToken, (req,res) => {
     
     var token = req.token;
@@ -318,7 +318,7 @@ router.put('/carer/addPatient', ensureToken, (req,res) => {
     
 })
 
-//update carer profile
+//update carer profile (put - raw- si autho)
 router.put('/carer/:id/', ensureToken, (req,res) => {
     var token = req.token;
     dataUserUpdate = req.body;
@@ -374,7 +374,7 @@ router.put('/carer/:id/', ensureToken, (req,res) => {
     
 })
 
-//add prescription to user 
+//add prescription to user (post - raw - si autho)
 router.post('/carer/:id/addprescription/:idUser', ensureToken, (req,res) => {
     var token = req.token;
     dataMedicationAdd = req.body;
