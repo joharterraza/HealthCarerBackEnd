@@ -72,7 +72,7 @@ router.get('/user/login/', (req,res) => {
                     user = JSON.parse(JSON.stringify(rows[0]))  
                     userIdToken = user.id 
                     // schedule = JSON.parse(getSchedule(user.id)) 
-                    jwt.sign({userIdToken}, 'secretkey', {expiresIn: 3600}, (err,token) =>{
+                    jwt.sign({userIdToken}, 'secretkey', {expiresIn: 28800}, (err,token) =>{
                         
                         userJson = {Status: 0, token: token, user : rows[0]}
                         res.json(userJson)
