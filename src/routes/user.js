@@ -105,7 +105,7 @@ router.get('/user/:id/schedule', ensureToken, (req,res) => {
             if(returnedId.toString() == id){
                 const query = `   select s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
                 s.medication from schedule as s                
-                where user = ?;`
+                where user = ? and (s.takenDosis < s.totalDosis);`
                 mysqlConnection.query(query, [id], (err, rows, fields) => {
                     if(!err) {
                         var scheduleArray = []

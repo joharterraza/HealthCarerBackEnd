@@ -224,11 +224,20 @@ router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
             var idPatient = req.params.idPatient;
             var returnedId = verifiedJwt.userIdToken
             if(returnedId.toString() == id){
-                const query = `  select id,email, photo, name, lastName, phoneNumber, token as pairingToken, 
-                genre, dateOfBirth from user where healtcarer = ? and id = ?`
+                const query = `  select u.id,u.email, u.photo, u.name, u.lastName, u.phoneNumber, u.token as pairingToken, 
+                u.genre, u.dateOfBirth, TIMESTAMPDIFF(YEAR, date(u.dateOfBirth), CURDATE()) AS age, 
+                s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, 
+                s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
+                s.medication, l.latitude, l.longitude from user as u
+                left outer join schedule as s on s.user = u.id
+                left outer join location as l on l.id = u.currentLocation
+                where u.healtcarer = ? and u.id = ? and (s.takenDosis < s.totalDosis)`
                 mysqlConnection.query(query, [id, idPatient], (err, rows, fields) => {
                     if(!err) {
                         var patientsArray = {}
+                        var scheduleArray = []
+                        var medicationObject = {}
+                        var locationObject = {}
                         console.log(rows);                
                         if(rows.length == 0){
                             
@@ -236,22 +245,49 @@ router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
                             res.json(patientsJson)
                                                   
                         }
-                        else{                   
-                            rows.forEach(r => {
-                               
-                                patientsArray = {
-                                    id: r.id,
-                                    email: r.email,
-                                    photo: r.photo,
-                                    name: r.name,
-                                    lastName: r.lastName,
-                                    phoneNumber: r.phonenumber,
-                                    gender: r.genre,
-                                    dob: r.dateOfBirth,
-                                    pairingToken: r.pairingToken,
-                                    
-                                }
-                            });
+                        else{  
+                            if(rows[0].idSchedule != null || rows[0].idSchedule != undefined){
+                                rows.forEach(r => {
+                                    medicationObject = {
+                                        name: r.medication
+                                    }
+                                    scheduleArray.push({
+                                        id: r.idSchedule,
+                                        startingOn: r.startingOn,
+                                        lastDoseDate: r.takenDate,
+                                        nextDoseDate: r.nextDosisDate,
+                                        takenDosis: r.takenDosis,
+                                        status: r.status,
+                                        dosage: r.Dosage,
+                                        takeEvery: r.takeEvery,
+                                        totalDosis: r.totalDosis,
+                                        medication: medicationObject
+            
+                                    })                                
+                                });
+                            }
+
+                            locationObject = {
+                                lat: rows[0].latitude,
+                                long: rows[0].longitude
+                            }
+
+                            patientsArray = {
+                                id: rows[0].id,
+                                email: rows[0].email,
+                                photo: rows[0].photo,
+                                name: rows[0].name,
+                                lastName: rows[0].lastName,
+                                phoneNumber: rows[0].phonenumber,
+                                gender: rows[0].genre,
+                                dob: rows[0].dateOfBirth,
+                                age: rows[0].age,
+                                pairingToken: rows[0].pairingToken,
+                                schedule: scheduleArray,
+                                currentLocation: locationObject
+                                
+                            }                 
+                            
                             patientsJson = {Status: 0, patient: patientsArray}
                             res.json(patientsJson)
                                                 
@@ -306,6 +342,47 @@ router.put('/carer/addPatient', ensureToken, (req,res) => {
                     }else {
                         console.log(err)
                         res.json({Status : 1, mensaje: 'Could not add carer'})
+                    }
+                });
+                
+            }
+           
+    
+            
+        }
+    })
+    
+})
+
+//check carer patient (get - raw- si autho)
+router.get('/carer/patient/exists', ensureToken, (req,res) => {
+    
+    var token = req.token;
+    var pairingToken = req.body.pairingToken
+    jwt.verify(req.token, 'secretkeycarer', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{    
+            if(isEmpty(pairingToken)){
+                res.json({Status : 900, message: 'Missing parameters'})
+            }      
+            else{                
+                const query = ` select id from user 
+                where token = ?
+                and healtCarer is null`
+                mysqlConnection.query(query, [pairingToken], (err, rows, fields) => {
+                    if(!err) {
+                        console.log(rows);
+                        if(rows.length > 0){
+                            res.json({Status : 0})
+                        }
+                        else{
+                            res.json({Status : 1})
+                        }                     
+                    }else {
+                        console.log(err)
+                        res.json({Status : 500, mensaje: 'Internal server error'})
                     }
                 });
                 
