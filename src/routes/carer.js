@@ -229,9 +229,11 @@ router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
                 s.id as idSchedule, s.startingOn, s.takenDate, s.nextDosisDate, s.takenDosis, 
                 s.status, s.Dosage, s.takeEvery, s.totalDosis, s.notes,
                 s.medication, l.latitude, l.longitude from user as u
-                left outer join schedule as s on s.user = u.id
+                left outer join 
+                (select * from schedule where takenDosis < totalDosis) as s on
+                s.user = u.id
                 left outer join location as l on l.id = u.currentLocation
-                where u.healtcarer = ? and u.id = ? and (s.takenDosis < s.totalDosis)`
+                where u.healtcarer = ? and u.id = ?`
                 mysqlConnection.query(query, [id, idPatient], (err, rows, fields) => {
                     if(!err) {
                         var patientsArray = {}
