@@ -43,6 +43,7 @@ router.post('/user/', (req, res) => {
                     res.json({Status : 1, message: 'Could not add user'})
                 } 
             }else {
+                console.log(err)
                 res.json({Status : 1, message: 'Could not add user'})
             }
         });
@@ -575,6 +576,7 @@ router.put('/user/:id/prescription/:idPresc/takenDosis', ensureToken, (req,res) 
                             res.json({Status : 1, message: 'Could not update dosis'})
                         } 
                     }else {
+                        console.log(err)
                         res.json({Status : 1, message: 'Could not update dosis'})
                     }
                 });
