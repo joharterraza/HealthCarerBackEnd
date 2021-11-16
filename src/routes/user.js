@@ -122,11 +122,23 @@ router.get('/user/:id/schedule', ensureToken, (req,res) => {
                                 medicationObject = {
                                     name: r.medication
                                 }
+                                dateS = new Date(r.startingOn);
+                                start = dateS.getFullYear()+'-' + (dateS.getMonth()+1) + '-'+dateS.getDate()+ ' '+ dateS.toLocaleTimeString('en-US');
+                                if(r.takenDate == null){
+                                    taken = null
+                                    next = null
+                                }
+                                else{
+                                    dateT = new Date(r.takenDate);
+                                    taken = dateT.getFullYear()+'-' + (dateT.getMonth()+1) + '-'+dateT.getDate()+ ' '+ dateT.toLocaleTimeString('en-US');
+                                    dateN = new Date(r.nextDosisDate);
+                                    next = dateN.getFullYear()+'-' + (dateN.getMonth()+1) + '-'+dateN.getDate()+ ' '+ dateN.toLocaleTimeString('en-US');
+                                }
                                 scheduleArray.push({
                                     id: r.idSchedule,
-                                    startingOn: r.startingOn,
-                                    lastDoseDate: r.takenDate,
-                                    nextDoseDate: r.nextDosisDate,
+                                    startingOn: start,
+                                    lastDoseDate: taken,
+                                    nextDoseDate: next,
                                     takenDosis: r.takenDosis,
                                     status: r.status,
                                     dosage: r.Dosage,
@@ -260,11 +272,23 @@ router.get('/user/:id/schedule/:idPresc', ensureToken, (req,res) => {
                                 medicationObject = {
                                     name: r.medication
                                 }
+                                dateS = new Date(r.startingOn);
+                                start = dateS.getFullYear()+'-' + (dateS.getMonth()+1) + '-'+dateS.getDate()+ ' '+ dateS.toLocaleTimeString('en-US');
+                                if(r.takenDate == null){
+                                    taken = null
+                                    next = null
+                                }
+                                else{
+                                    dateT = new Date(r.takenDate);
+                                    taken = dateT.getFullYear()+'-' + (dateT.getMonth()+1) + '-'+dateT.getDate()+ ' '+ dateT.toLocaleTimeString('en-US');
+                                    dateN = new Date(r.nextDosisDate);
+                                    next = dateN.getFullYear()+'-' + (dateN.getMonth()+1) + '-'+dateN.getDate()+ ' '+ dateN.toLocaleTimeString('en-US');
+                                }
                                 prescObject = {
                                     id: r.idSchedule,
-                                    startingOn: r.startingOn,
-                                    lastDoseDate: r.takenDate,
-                                    nextDoseDate: r.nextDosisDate,
+                                    startingOn: start,
+                                    lastDoseDate: taken,
+                                    nextDoseDate: next,
                                     takenDosis: r.takenDosis,
                                     status: r.status,
                                     dosage: r.Dosage,
