@@ -277,6 +277,7 @@ router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
                                         dosage: r.Dosage,
                                         takeEvery: r.takeEvery,
                                         totalDosis: r.totalDosis,
+                                        notes: r.notes,
                                         medication: medicationObject
             
                                     })                                

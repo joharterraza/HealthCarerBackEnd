@@ -144,6 +144,7 @@ router.get('/user/:id/schedule', ensureToken, (req,res) => {
                                     dosage: r.Dosage,
                                     takeEvery: r.takeEvery,
                                     totalDosis: r.totalDosis,
+                                    notes: r.notes,
                                     medication: medicationObject
         
                                 })
@@ -294,6 +295,7 @@ router.get('/user/:id/schedule/:idPresc', ensureToken, (req,res) => {
                                     dosage: r.Dosage,
                                     takeEvery: r.takeEvery,
                                     totalDosis: r.totalDosis,
+                                    notes: r.notes,
                                     medication: medicationObject
                                 }
                             });
