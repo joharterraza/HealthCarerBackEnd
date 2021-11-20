@@ -332,7 +332,7 @@ router.get('/carer/:id/patient/:idPatient', ensureToken, (req,res) => {
 })
 
 //update user carer (put - raw- si autho)
-router.put('/carer/addPatient', ensureToken, (req,res) => {
+router.put('/carer/patient/add', ensureToken, (req,res) => {
     
     var token = req.token;
     var pairingToken = req.body.pairingToken
@@ -350,6 +350,7 @@ router.put('/carer/addPatient', ensureToken, (req,res) => {
                 mysqlConnection.query(query, [idCarer, pairingToken], (err, rows, fields) => {
                     if(!err) {
                         console.log(rows);
+                        console.log(idCarer);
                         if(rows.affectedRows > 0){
                             res.json({Status : 0, mensaje: 'Carer updated'})        
                         }
