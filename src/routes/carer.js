@@ -346,7 +346,8 @@ router.put('/carer/patient/add', ensureToken, (req,res) => {
             }      
             else{
                 var idCarer = verifiedJwt.userIdToken
-                const query = ` update user set healtCarer = ? where id = (select id from user where token = ?)`
+                const query = `UPDATE user SET healtCarer=? WHERE id IN
+                (SELECT * FROM (SELECT id FROM user WHERE token = ?) as t)`
                 mysqlConnection.query(query, [idCarer, pairingToken], (err, rows, fields) => {
                     if(!err) {
                         console.log(rows);

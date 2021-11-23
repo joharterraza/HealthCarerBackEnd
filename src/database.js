@@ -1,10 +1,11 @@
 const mysql = require('mysql');
 
 const mysqlConnection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
+  host: 'db-mysql-sfo2-13237-do-user-10211536-0.b.db.ondigitalocean.com',
+  user: 'superuser',
+  password: 'lvnO1ZcmHFHlmslP',
   database: 'grandcares',
+  port: 25060,
   multipleStatements: true
 });
 
@@ -18,3 +19,4 @@ mysqlConnection.connect(function (err) {
 });
 
 module.exports = mysqlConnection;
+
