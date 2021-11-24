@@ -6,7 +6,8 @@ const mysqlConnection = mysql.createConnection({
   password: 'lvnO1ZcmHFHlmslP',
   database: 'grandcares',
   port: 25060,
-  multipleStatements: true
+  multipleStatements: true,
+  timezone: 'utc' 
 });
 
 mysqlConnection.connect(function (err) {

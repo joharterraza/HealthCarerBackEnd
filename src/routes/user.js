@@ -123,6 +123,7 @@ router.get('/user/:id/schedule', ensureToken, (req,res) => {
                                     name: r.medication
                                 }
                                 dateS = new Date(r.startingOn);
+                                console.log(r.startingOn)
                                 start = dateS.getFullYear()+'-' + (dateS.getMonth()+1) + '-'+dateS.getDate()+ ' '+ dateS.toLocaleTimeString('en-US');
                                 if(r.takenDate == null){
                                     taken = null
@@ -493,9 +494,9 @@ router.post('/user/:id/prescription', ensureToken, (req,res) => {
             if(returnedId.toString() == id){
                 const query = ` insert into schedule (Dosage,takeEvery,totalDosis, startingOn,
                     notes, status, user, medication)
-                    values (?,?,?,?,?,1,?,?)`
+                    values (?,?,?,now(),?,1,?,?)`
                 mysqlConnection.query(query, [dataMedicationAdd.dose,dataMedicationAdd.takeEvery,
-                dataMedicationAdd.numberDosis, dataMedicationAdd.startingOn, dataMedicationAdd.notes,
+                dataMedicationAdd.numberDosis, dataMedicationAdd.notes,
                 id, dataMedicationAdd.medication], (err, rows, fields) => {
                     if(!err) {
                         console.log(rows);
@@ -506,6 +507,7 @@ router.post('/user/:id/prescription', ensureToken, (req,res) => {
                             res.json({Status : 1, message: 'Could not create prescription'})
                         } 
                     }else {
+                        console.log(err)
                         res.json({Status : 1, message: 'Could not create prescription'})
                     }
                 });

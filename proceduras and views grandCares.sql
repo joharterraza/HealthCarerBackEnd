@@ -63,6 +63,32 @@ DELIMITER ;
 
 
 
+DELIMITER $$
+CREATE PROCEDURE addUserByCarer(
+  IN _token varchar(150),
+  IN _idCarer int
+)
+Begin
+	declare _exist int;
+	declare exit handler for sqlexception
+		begin			
+			select 999 as result;            
+			rollback;        
+		end;
+	set _exist = (select id from user where token = _token and healtCarer is null);
+	if _exist > 0  then
+		UPDATE user SET healtCarer= _idCarer WHERE id = _exist;
+		select 0 as result;
+	else 
+		select 1 as result;
+	end if;
+    
+    
+END$$
+DELIMITER ;
+
+
+
 
 
 

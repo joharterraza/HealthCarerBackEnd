@@ -346,21 +346,28 @@ router.put('/carer/patient/add', ensureToken, (req,res) => {
             }      
             else{
                 var idCarer = verifiedJwt.userIdToken
-                const query = `UPDATE user SET healtCarer=? WHERE id IN
-                (SELECT * FROM (SELECT id FROM user WHERE token = ?) as t)`
-                mysqlConnection.query(query, [idCarer, pairingToken], (err, rows, fields) => {
+                const query = `call addUserByCarer(?,?)`
+                mysqlConnection.query(query, [pairingToken, idCarer], (err, rows, fields) => {
                     if(!err) {
-                        console.log(rows);
-                        console.log(idCarer);
-                        if(rows.affectedRows > 0){
-                            res.json({Status : 0, mensaje: 'Carer updated'})        
+                        console.log(rows);  
+                        var string=JSON.stringify(rows);
+                        console.log(string);
+                        var json =  JSON.parse(string);
+                        console.log(json[0][0].result)
+                        if(json[0][0].result == 0){
+                            res.json({Status : 0, mensaje: 'User added successfully'})
+                        }
+                        else if(json[0][0].result == 1){
+                            res.json({Status : 2, mensaje: 'User does not exists'})
                         }
                         else{
-                            res.json({Status : 1, mensaje: 'Could not add carer'})
-                        } 
+                            res.json({Status : 1, mensaje: 'Could not add user'})
+                        }
+                                             
+                        
                     }else {
                         console.log(err)
-                        res.json({Status : 1, mensaje: 'Could not add carer'})
+                        res.json({Status : 1, mensaje: 'Could not add user'})
                     }
                 });
                 
