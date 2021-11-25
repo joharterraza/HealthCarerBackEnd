@@ -494,9 +494,10 @@ router.post('/carer/:id/addprescription/:idUser', ensureToken, (req,res) => {
             if(returnedId.toString() == id){
                 const query = ` insert into schedule (Dosage,takeEvery,totalDosis, startingOn,
                     notes, status, user, medication)
-                    values (?,?,?,?,?,1,?,?)`
+                    values (?,?,?,now(),?,1,?,?)`
+                console.log(idUser)
                 mysqlConnection.query(query, [dataMedicationAdd.dose,dataMedicationAdd.takeEvery,
-                dataMedicationAdd.numberDosis, dataMedicationAdd.startingOn, dataMedicationAdd.notes,
+                dataMedicationAdd.numberDosis, dataMedicationAdd.notes,
                 idUser, dataMedicationAdd.medication], (err, rows, fields) => {
                     if(!err) {
                         
