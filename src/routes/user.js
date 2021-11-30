@@ -535,21 +535,20 @@ router.put('/user/:id/', ensureToken, (req,res) => {
             var id = req.params.id;
             var returnedId = verifiedJwt.userIdToken
             if(returnedId.toString() == id){
-                if(isEmpty(dataUserUpdate.email) || isEmpty(dataUserUpdate.password) || isEmpty(dataUserUpdate.photo) || isEmpty(dataUserUpdate.name) ||        
+                if(isEmpty(dataUserUpdate.email) || isEmpty(dataUserUpdate.photo) || isEmpty(dataUserUpdate.name) ||        
                 isEmpty(dataUserUpdate.lastname) || isEmpty(dataUserUpdate.phonenumber) || isEmpty(dataUserUpdate.genre) ||
                 isEmpty(dataUserUpdate.dob)){
         
                     res.json({Status : 900, message: 'Missing parameters'})
                 }
                 else{
-                    var concatInfo = dataUserUpdate.email + dataUserUpdate.password
-                    const query = `update user set name = ?, lastName = ?, email = ?, password = (sha1(?)),
-                    phoneNumber = ?, genre = ?, dateOfBirth = ?, photo = ?, token = (sha1('` + concatInfo + `'))
-                     where id = ?` 
+                    
+                    const query = `update user set name = ?, lastName = ?, email = ?,
+                    phoneNumber = ?, genre = ?, dateOfBirth = ?, photo = ? where id = ?` 
                      
                     
                      mysqlConnection.query(query, [dataUserUpdate.name, dataUserUpdate.lastname, dataUserUpdate.email,
-                        dataUserUpdate.password, dataUserUpdate.phonenumber, dataUserUpdate.genre, dataUserUpdate.dob,
+                        dataUserUpdate.phonenumber, dataUserUpdate.genre, dataUserUpdate.dob,
                         dataUserUpdate.photo, id], (err, rows, fields) => {
                             console.log(query)
                             if(!err) {
@@ -579,6 +578,58 @@ router.put('/user/:id/', ensureToken, (req,res) => {
     })
     
 })
+
+//update password
+router.put('/user/:id/updatepassword', ensureToken, (req,res) => {
+    var token = req.token;
+    dataUserUpdate = req.body;
+    jwt.verify(req.token, 'secretkey', (err, verifiedJwt) => {
+        if(err){
+            res.json({Status: 2, message: "Invalid Token"})
+          
+        }else{          
+            var id = req.params.id;
+            var returnedId = verifiedJwt.userIdToken
+            if(returnedId.toString() == id){
+                if(isEmpty(dataUserUpdate.password)){
+        
+                    res.json({Status : 900, message: 'Missing parameters'})
+                }
+                else{
+                    
+                    const query = `update user set password = (sha1(?)) where id = ?` 
+                     
+                    
+                    mysqlConnection.query(query, [dataUserUpdate.password, id], (err, rows, fields) => {
+                            console.log(query)
+                            if(!err) {
+                                console.log(rows);
+                                if(rows.affectedRows > 0){
+                                    res.json({Status : 0, message: 'Password Updated'})        
+                                }
+                                else{
+                                    res.json({Status : 1, message: 'Could not update password'})
+                                } 
+                            }else {
+                                console.log(err)
+                                res.json({Status : 1, message: 'Could not update password'})
+                            }
+                    });
+                }
+               
+                
+            }
+            else{
+                res.json({Status : 1, message: 'User ID invalid'})
+            }
+            
+    
+            
+        }
+    })
+    
+})
+
 
 //add taken dosis
 router.put('/user/:id/prescription/:idPresc/takenDosis', ensureToken, (req,res) => {
